@@ -29,8 +29,7 @@ function cleanParamsfromUrl(urlstr){
     var index = urlChars.indexOf("?");
     urlChars = urlChars.slice(0, index);
     return urlChars.join("");
-    console.log(urlChars.join(""));
-    
+   
 }
 
 
