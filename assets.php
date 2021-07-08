@@ -2,7 +2,7 @@
 
 function get_theForm(){
    return '
-   <form id="zipForm" style="display: none; text-align: left;" onsubmit="zipSub(event)">
+   <form class="va-search-form" id="zipForm" style="display: none" onsubmit="zipSub(event)">
 
    <input type="radio" id="state-search" name="state-search" value="state-only" checked onchange="changeForm(event)">
   <label for="state-search" style="width: 10em;">Search by State</label><br>
@@ -28,10 +28,10 @@ function get_theForm(){
      </div>
      <div id="address3" style="">
    <label for="userZip">Enter 5 digit Zipcode</label>
-   <input id="userZip" placeholder="zipdcode" name="zipcode" value="" type="text"  maxlength="5" minlength="5"
+   <input id="userZip" placeholder="zipcode" name="zipcode" value="" type="text"  maxlength="5" minlength="5"
   style="width: 10em;"  required/>
   </div>
-   <button type="submit" style="margin: 5px; font-weight: bold;">Submit Zipcode</button>
+   <input type="submit" class="va-button" style="margin: 5px; font-weight: bold; cursor: pointer;" value="Submit VA search" />
    </form>
 
     <div id="vso-results">
@@ -41,8 +41,10 @@ function get_theForm(){
     </div>
     <div id="zip-results">
       <p id="status-message" style="font-size: 16px;"></p>
-      <div id="zip-table-wrapper"></div>
+      <div id="va-table-wrapper"></div>
     </div>
+    <p class="blah">test css</p>
+    <a class="wait" href="#">TEST LINK HOVER</a>
   <script>
   // states array should be in external JS; if it reads, function called below to build form options
   if(states){
