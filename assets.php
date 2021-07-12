@@ -2,36 +2,47 @@
 
 function get_theForm(){
    return '
-   <form class="va-search-form" id="zipForm" style="display: none" onsubmit="zipSub(event)">
+   <form class="va-search-form va-hide" id="zipForm" onsubmit="zipSub(event)">
+   <h4 style="text-align: center;">Search VA.gov for Facilities</h4>
+   <p>Search Nearby Address finds VA facilities within estimated 90 minutes drive time.  You may use a home address,
+   or any full street address.
+   </p>
+<div class="va-radio-buttons">
 
+<div>
+   <label for="state-search">Search by State</label><br/>
    <input type="radio" id="state-search" name="state-search" value="state-only" checked onchange="changeForm(event)">
-  <label for="state-search" style="width: 10em;">Search by State</label><br>
-
+</div>
+<div>
+  <label for="zipcode-search" >Search by Zipcode</label><br/>
   <input type="radio" id="zipcode-search" name="zipcode-search" value="zip-only" onchange="changeForm(event)">
-  <label for="zipcode-search" style="width: 10em;">Search by Zipcode</label><br>
-
+</div>
+<div>
+  <label for="address-search">Search nearby Address</label><br/>
   <input type="radio" id="address-search" name="addr-search" value="full-address" onchange="changeForm(event)">
-  <label for="address-search" style="width: 10em;">Search nearby Address</label>
+</div>
+</div> <!-- closes va-radio-buttons div -->
 
-
-  <div id="address1" style="">
+  <div id="address1" style="" class="va-form-inputgroup">
+  <p>Enter any full street address to find facilities within 90 minutes drive time.</p>
     <label for="street-address">Enter Street Address:</label>
     <input id="street-address" type="text" placeholder="street address" name="address" value="" required />
     <label for="city">Enter City:</label>
     <input id="city" type="text"  placeholder="city" name="city" value="" required />
     </div>
-  <div id="address2" style="">
+  <div id="address2" style="" class="va-form-inputgroup">
     <label for="choose-state">Select your State:</label>
      <select name="state"  id="choose-state">
      <option value="">choose:</option>
      </select><br/>
      </div>
-     <div id="address3" style="">
+     <div id="address3" style="" class="va-form-inputgroup">
    <label for="userZip">Enter 5 digit Zipcode</label>
    <input id="userZip" placeholder="zipcode" name="zipcode" value="" type="text"  maxlength="5" minlength="5"
-  style="width: 10em;"  required/>
+        required/>
   </div>
-   <input type="submit" class="va-button" style="margin: 5px; font-weight: bold; cursor: pointer;" value="Submit VA search" />
+  <p style="text-align: center;">
+   <input type="submit" id="va-search-submit" style="" value="Submit VA search" /></p>
    </form>
 
     <div id="vso-results">
@@ -43,10 +54,9 @@ function get_theForm(){
       <p id="status-message" style="font-size: 16px;"></p>
       <div id="va-table-wrapper"></div>
     </div>
-    <p class="blah">test css</p>
-    <a class="wait" href="#">TEST LINK HOVER</a>
+  
   <script>
-  // states array should be in external JS; if it reads, function called below to build form options
+  // states array should be in external JS; if it reads, function is called below to build form options
   if(states){
     renderFormMenu(states);
   }

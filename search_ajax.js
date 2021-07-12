@@ -20,40 +20,35 @@ function changeForm(e){
 		state.checked = false;
 		  enableFormInputs(e.target.value);
 	}
-
 }
 
 function zipSub(e){
 	e.preventDefault();
-
 var arr = jQuery("#zipForm").serializeArray();
-
-if(arr[1].name === "state"){
-
-			if(arr[1].value === ""){return alert("please choose a state");}
-			else {
-			var state = getStateAbbr(arr[1].value, states);
-			vso(state);
-			buildVa(createLinkState(arr[1].value));
+		if(arr[1].name === "state"){
+					if(arr[1].value === ""){return alert("please choose a state");}
+					else {
+					var state = getStateAbbr(arr[1].value, states);
+					vso(state);
+					buildVa(createLinkState(arr[1].value));
+				}
 		}
-}
-if(arr[1].name === "zipcode"){
+		if(arr[1].name === "zipcode"){
 
-	if(arr[1].value === ""){return alert("zipcode value is blank or invalid");}
-	else if (isNaN(arr[1].value)){return alert("enter 5 digit zipcode with numbers only");}
-	else {
-	var state = getzipState(arr[1].value, states);
-	vso(state);
-	buildVa(createLinkZip(arr[1].value));
-	}
-}
+			if(arr[1].value === ""){return alert("zipcode value is blank or invalid");}
+			else if (isNaN(arr[1].value)){return alert("enter 5 digit zipcode with numbers only");}
+			else {
+			var state = getzipState(arr[1].value, states);
+			vso(state);
+			buildVa(createLinkZip(arr[1].value));
+			}
+		}
 
-if(arr[1].name === "address"){
-	var state = getStateAbbr(arr[3].value, states);
-	vso(state);
- queryNearby(createNearbyLink(arr));
-}
-
+		if(arr[1].name === "address"){
+			var state = getStateAbbr(arr[3].value, states);
+			vso(state);
+		 queryNearby(createNearbyLink(arr));
+		}
 
 };
 
@@ -85,8 +80,8 @@ function hideOrDisableVAButtons(hide){
 var paginationRow = document.getElementsByClassName("va-table-pagination")[0];
 var messageRow = document.getElementsByClassName("va-table-message")[0];
 	if(paginationRow && messageRow){
-			if(hide){paginationRow.style.display = "none"; messageRow.style = "";}
-			if(!hide){paginationRow.style = ""; messageRow.style.display = "none";}
+		if(hide){paginationRow.classList.add("va-hide"); messageRow.classList.remove("va-hide");}
+		if(!hide){paginationRow.classList.remove("va-hide"); messageRow.classList.add("va-hide");}
 	}
 }
 
@@ -119,7 +114,7 @@ const queryNearby = (_link) => {
 						buildVa(createLinkIDs(idStr));
 					}
 	}).fail(function (errorThrown){
-	console.log(errorThrown);
+
 	jQuery("#status-message").html(errorThrown.status + ' ' + errorThrown.statusText);})
 }
 
@@ -157,12 +152,12 @@ hideOrDisableVAButtons(false);
 
 const vso = (_state) => {
 if(_state){
-	jQuery('#vso-results > h6 > a').text('Find Veterans Service Offices in ' + _state.long).attr("href", _state.svao);
+	jQuery('#vso-results > h6 > a').text('State Veterans Services Office for  ' + _state.long).attr("href", _state.svao);
 	jQuery('#vso-results > p > a').text(_state.svao).attr("href", _state.svao);
    }
 };
 //currently unused function, may incorporate at a later time for outputting Auntbertha results
-const buildAuntBerta = (zip) => {
+/*const buildAuntBerta = (zip) => {
 	var ab = document.getElementsByClassName('auntbertha');
 
 	for (var i = 0; i < ab.length; i++) {
@@ -172,12 +167,11 @@ const buildAuntBerta = (zip) => {
 		<i class="fas fa-external-link-alt" aria-hidden="true"></i></a>`
 		classlist.add("card-text")
 	}
-};
-
+};*/
 
 const processVaResponse = (response) => {
-	var table = document.getElementById('va-table-wrapper');
-	table.innerHTML = "";
+	var tableWrap = document.getElementById('va-table-wrapper');
+	tableWrap.innerHTML = "";
 	let data = response.data;
 	let facilities = []
 	for (var i = 0; i < data.length; i++) {
@@ -191,6 +185,7 @@ const processVaResponse = (response) => {
 	let links = response.links;
 
 	var resultsTable = document.createElement('table');
+	resultsTable.setAttribute("class", "va-results-table");
 	var resultsTitle = resultsTable.createCaption();
 	resultsTitle.innerHTML =`Found ${totalEntries} VA Facilities`;
 	var resultsTableBody = document.createElement("tbody");
@@ -202,47 +197,34 @@ const processVaResponse = (response) => {
 		var tFootMsg = document.createElement("tr");
 		var tFootMsgCell = document.createElement("td");
 		tFootMsgCell.innerText = "Loading Next Page, please wait...";
+		tFootMsgCell.setAttribute("colspan", "4");
 		tFootMsg.appendChild(tFootMsgCell);
-		resultsTableFoot.appendChild(tFootMsg);
 		tFootMsg.setAttribute("class", "va-table-message");
-		tFootMsg.style.display = "none";
+	  tFootMsg.classList.add("va-hide");
+	  resultsTableFoot.appendChild(tFootMsg);
 
-
-// 'links' object w'in JSON contains search queries for next/prev pages
-
-if(links.prev !== null){
-	const paginationCell2 = document.createElement('td');
-	paginationCell2.setAttribute("class", "pagination-cell");
-	const paginationLink2 = document.createElement('a');
-	paginationLink2.setAttribute("class", "pagination");
-	paginationLink2.classList.add("va-button");
-	paginationLink2.innerText = "prev";
-	paginationLink2.href = links.prev;
-	paginationLink2.addEventListener("click", getPage, false);
-	paginationCell2.appendChild(paginationLink2);
-	tFootTr.appendChild(paginationCell2)
-}
-const pageNum = document.createElement('td');
-pageNum.innerText = "page " + currentPage + " of " + totalPages;
-pageNum.setAttribute("class", "va-page-number");
-tFootTr.appendChild(pageNum);
-
-if(links.next !== null){
-	const paginationCell = document.createElement('td');
-	paginationCell.setAttribute("class", "pagination-cell");
-	const paginationLink = document.createElement('a');
-	paginationLink.setAttribute("class", "pagination");
-	paginationLink.classList.add("va-button");
-	paginationLink.innerText = "next";
-	paginationLink.href = links.next;
-	paginationLink.addEventListener("click", getPage, false);
-	paginationCell.appendChild(paginationLink);
-	tFootTr.appendChild(paginationCell)
-
-}
-// row header code here
-
-	resultsTableFoot.appendChild(tFootTr);
+		for (let i = 1; i < 4; i++) {
+			const paginationCell = document.createElement('td');
+	    paginationCell.setAttribute("class", "pagination-cell");
+			paginationCell.setAttribute("id", "pagination-cell"+i.toString());
+			if(i == 1 && links.prev){
+				const paginationLink = document.createElement('a');
+	         paginationLink.innerText = "<< Prev";
+					 paginationLink.href = links.prev;
+					 paginationLink.addEventListener("click", getPage, false);
+					 paginationCell.appendChild(paginationLink);
+		   	}
+	   	if(i == 2){	paginationCell.innerText = "page " + currentPage + " of " + totalPages;}
+			if(i == 3 && links.next){
+				const paginationLink = document.createElement('a');
+					 paginationLink.innerText = "Next >>";
+					 paginationLink.href = links.next;
+					  paginationLink.addEventListener("click", getPage, false);
+					 paginationCell.appendChild(paginationLink);
+				}
+  	tFootTr.appendChild(paginationCell);
+		}
+			resultsTableFoot.appendChild(tFootTr);
 
 	facilities.forEach(function (facility) {
 		let website = facility.attributes.website;
@@ -268,14 +250,14 @@ if(links.next !== null){
 		}
 
 		var tr = document.createElement('tr');
-		tr.innerHTML  = `<td colspan="2"><p>` + name + `</p><p>` + facility.attributes.phone.main +`</p></td><td><p>` + facility.attributes.address.physical.address_1 +`<br />`+ address2 +`<br />`+facility.attributes.address.physical.city+`, `+facility.attributes.address.physical.state+` `+facility.attributes.address.physical.zip + `</p></td><td colspan="2"><p>Operating Status: ${code}</p><p>${additionalInfo}<p></td>`;
+		tr.innerHTML  = `<td><p>` + name + `</p><p>` + facility.attributes.phone.main +`</p></td><td><p>` + facility.attributes.address.physical.address_1 +`<br />`+ address2 +`<br />`+facility.attributes.address.physical.city+`, `+facility.attributes.address.physical.state+` `+facility.attributes.address.physical.zip + `</p></td><td><p>Operating Status: ${code}</p><p>${additionalInfo}<p></td>`;
 		resultsTableBody.appendChild(tr);
 	});
 
 	resultsTable.appendChild(resultsTableBody);
 	resultsTable.appendChild(resultsTableFoot);
-	//append table to "table" div wrapper
-	table.appendChild(resultsTable);
+	//append table to table div wrapper
+	tableWrap.appendChild(resultsTable);
 };
 
 const getPage = (e) => {
@@ -302,8 +284,7 @@ let fullstate = getFullState(stateAbbr, states);*/
 function renderFormMenu(_states){
 		let form = document.getElementById("zipForm");
 		if(form){
-			// remove inline style="display: none;" property, and all other properties
-			form.style = " ";
+		 form.classList.remove("va-hide");
 		   }
 		let selectState = document.getElementById("choose-state");
 		if(selectState){
@@ -334,9 +315,10 @@ function enableFormInputs(which){
 
 	switch(which) {
   case "state-only":
-    statediv.style.display = "inline";
-		streetdiv.style.display = "none";
-		zipdiv.style.display = "none";
+
+		statediv.classList.remove("va-hide");
+		streetdiv.classList.add("va-hide");
+		zipdiv.classList.add("va-hide");
 
     stateinput.removeAttribute("disabled");
 		streetinput.setAttribute("disabled", true);
@@ -346,9 +328,11 @@ function enableFormInputs(which){
 
     break;
   case "zip-only":
-	statediv.style.display = "none";
-	streetdiv.style.display = "none";
-	zipdiv.style.display = "inline";
+
+	statediv.classList.add("va-hide");
+	streetdiv.classList.add("va-hide");
+	zipdiv.classList.remove("va-hide");
+
 
 	stateinput.setAttribute("disabled", true);
 	streetinput.setAttribute("disabled", true);
@@ -357,9 +341,10 @@ function enableFormInputs(which){
 
     break;
 	case "full-address":
-	statediv.style.display = "inline";
-	streetdiv.style.display = "inline";
-	zipdiv.style.display = "inline";
+
+	statediv.classList.remove("va-hide");
+	streetdiv.classList.remove("va-hide");
+	zipdiv.classList.remove("va-hide");
 
 	stateinput.removeAttribute("disabled");
 	cityinput.removeAttribute("disabled");
