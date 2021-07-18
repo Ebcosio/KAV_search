@@ -25,6 +25,8 @@ function changeForm(e){
 function zipSub(e){
 	e.preventDefault();
 var arr = jQuery("#zipForm").serializeArray();
+console.log(arr);
+
 		if(arr[1].name === "state"){
 					if(arr[1].value === ""){return alert("please choose a state");}
 					else {
@@ -38,9 +40,13 @@ var arr = jQuery("#zipForm").serializeArray();
 			if(arr[1].value === ""){return alert("zipcode value is blank or invalid");}
 			else if (isNaN(arr[1].value)){return alert("enter 5 digit zipcode with numbers only");}
 			else {
-			var state = getzipState(arr[1].value, states);
-			vso(state);
-			buildVa(createLinkZip(arr[1].value));
+						if(arr[2].value === "within-zip"){
+					var state = getzipState(arr[1].value, states);
+					vso(state);
+					buildVa(createLinkZip(arr[1].value)); }
+					else {
+					queryNearby(createNearbyZipLink(arr[1].value));
+					}
 			}
 		}
 
@@ -52,26 +58,32 @@ var arr = jQuery("#zipForm").serializeArray();
 
 };
 
+//adds params for nearby with zip only query; other queries an empty string
+const createNearbyZipLink = (zipStr) => {
+let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address=na&city=na&state=na&zip=' + zipStr + '&drive_time=90';
+return link;
+}
+
 //adds params for nearby street address
 const createNearbyLink = (_queryArr) => {
 	if(_queryArr.length > 2 ){
-		link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value+'&city='+_queryArr[2].value+'&state='+_queryArr[3].value+'&zip='+_queryArr[4].value+'&drive_time=90';
+	let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value+'&city='+_queryArr[2].value+'&state='+_queryArr[3].value+'&zip='+_queryArr[4].value+'&drive_time=90';
 	}
 	return link;
 }
-
+// add params with id string
 const createLinkIDs = (_idStr) => {
-   let link = 'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?ids=' + _idStr +'&per_page=5';
+   let link = 'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?ids=' + _idStr +'&per_page=20';
 	return link;
 }
-
+// add params with zip, etc...
 const createLinkZip = (_zip) => {
-	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?zip=' + _zip + '&per_page=5';
+	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?zip=' + _zip + '&per_page=20';
 	return link;
 }
 
 const createLinkState = (state) => {
-	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?state=' + state + '&per_page=5';
+	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?state=' + state + '&per_page=20';
 	return link;
 }
 
@@ -86,6 +98,7 @@ var messageRow = document.getElementsByClassName("va-table-message")[0];
 }
 
 const queryNearby = (_link) => {
+	// getTable arg is a boolean
 	jQuery("#status-message").html('Searching VA facilities.  This may take a moment...');
 	  jQuery.ajax({
 	    type: "POST",
@@ -93,47 +106,57 @@ const queryNearby = (_link) => {
 			async: true,
 	   url: the_ajax_script.ajaxurl,
 	   data: {
-	       action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
-				 link : _link,
-	       nonce_data : the_ajax_script.nonce, // PHP: $_POST['nonce_data']
+	      action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
+			 link : _link,
+		   getTable : "false",
+	      nonce_data : the_ajax_script.nonce, // PHP: $_POST['nonce_data']
 	   }
 	 })
 	 .done(function (response) {
 			jQuery("#status-message").html('');
              //Va response contains facility id's in each Json array element
-					 let parsed = JSON.parse(response);
-					 // errors property indicates error message from VA API
-					 if(parsed.errors){jQuery("#status-message").text(parsed.errors[0].title);}
-					 // error property from WP server
-					 else if(parsed.error){jQuery("#status-message").html(parsed.error);}
-					 else if(!parsed.data){jQuery("#status-message").html('server error');}
-					 else {
+            let parsed = JSON.parse(response);
 						 // we may eventually need to store idArray values in DOM, for further querying of API
             let idArray = parsed.data.map(el => {return el.id;});
             let idStr = idArray.join(',');
 						buildVa(createLinkIDs(idStr));
-					}
+
+						console.log(response);
+
 	}).fail(function (errorThrown){
 
 	jQuery("#status-message").html(errorThrown.status + ' ' + errorThrown.statusText);})
 }
 
 const buildVa = (_link) => {
+	//renderTable arg is a boolean
 jQuery("#status-message").html('loading...');
-hideOrDisableVAButtons(true);
+	hideOrDisableVAButtons(true);
   jQuery.ajax({
     type: "POST",
 		timeout: 6000,
 		async: true,
    url: the_ajax_script.ajaxurl,
+	// dataType: 'text',
+//	 contentType: "text/plain",
    data: {
        action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
 			 link : _link,
+			 getTable : "true",
        nonce_data : the_ajax_script.nonce, // PHP: $_POST['nonce_data']
    }
+
  }).done(function (response) {
 
-let parsed = JSON.parse(response);
+//let parsed = JSON.parse(response);
+	//	if(parsed.table && parsed.table === "is here"){
+			console.log(response);
+			console.log(typeof response);
+			jQuery("#status-message").html('');
+			jQuery("#zip-results").html(response);
+	hideOrDisableVAButtons(false);
+	//	}
+	/*	else {
 jQuery("#status-message").html('');
 hideOrDisableVAButtons(false);
 	 // if .errors property exists, came from VA.gov API
@@ -143,6 +166,7 @@ hideOrDisableVAButtons(false);
 	 else if(!parsed.data){jQuery("#status-message").html('server error');}
 	 else{
  		processVaResponse(parsed);}
+	}*/
 }).fail(function (errorThrown){
 	hideOrDisableVAButtons(false);
 	// error thrown from .fail will be from JQuery ajax error
@@ -169,99 +193,11 @@ if(_state){
 	}
 };*/
 
-const processVaResponse = (response) => {
-	var tableWrap = document.getElementById('va-table-wrapper');
-	tableWrap.innerHTML = "";
-	let data = response.data;
-	let facilities = []
-	for (var i = 0; i < data.length; i++) {
-		facilities.push(data[i])
-	}
-	let meta = response.meta;
-	let paginationInfo = meta.pagination;
-	let currentPage = paginationInfo.current_page;
-	let totalEntries = paginationInfo.total_entries;
-	let totalPages = paginationInfo.total_pages;
-	let links = response.links;
 
-	var resultsTable = document.createElement('table');
-	resultsTable.setAttribute("class", "va-results-table");
-	var resultsTitle = resultsTable.createCaption();
-	resultsTitle.innerHTML =`Found ${totalEntries} VA Facilities`;
-	var resultsTableBody = document.createElement("tbody");
-	var resultsTableFoot = document.createElement("tfoot");
-	var tFootTr = document.createElement('tr');
-	tFootTr.setAttribute("class", "va-table-pagination");
-
-//code block for adding loading page message, will hide pagination link/buttons when loading
-		var tFootMsg = document.createElement("tr");
-		var tFootMsgCell = document.createElement("td");
-		tFootMsgCell.innerText = "Loading Next Page, please wait...";
-		tFootMsgCell.setAttribute("colspan", "4");
-		tFootMsg.appendChild(tFootMsgCell);
-		tFootMsg.setAttribute("class", "va-table-message");
-	  tFootMsg.classList.add("va-hide");
-	  resultsTableFoot.appendChild(tFootMsg);
-
-		for (let i = 1; i < 4; i++) {
-			const paginationCell = document.createElement('td');
-	    paginationCell.setAttribute("class", "pagination-cell");
-			paginationCell.setAttribute("id", "pagination-cell"+i.toString());
-			if(i == 1 && links.prev){
-				const paginationLink = document.createElement('a');
-	         paginationLink.innerText = "<< Prev";
-					 paginationLink.href = links.prev;
-					 paginationLink.addEventListener("click", getPage, false);
-					 paginationCell.appendChild(paginationLink);
-		   	}
-	   	if(i == 2){	paginationCell.innerText = "page " + currentPage + " of " + totalPages;}
-			if(i == 3 && links.next){
-				const paginationLink = document.createElement('a');
-					 paginationLink.innerText = "Next >>";
-					 paginationLink.href = links.next;
-					  paginationLink.addEventListener("click", getPage, false);
-					 paginationCell.appendChild(paginationLink);
-				}
-  	tFootTr.appendChild(paginationCell);
-		}
-			resultsTableFoot.appendChild(tFootTr);
-
-	facilities.forEach(function (facility) {
-		let website = facility.attributes.website;
-		let address2 = facility.attributes.address.physical.address_2;
-		if (address2 === null) {
-			address2 = ""
-		}
-		let name = facility.attributes.name;
-		let code = facility.attributes.operating_status.code;
-		if (code === null) {
-			code = ""
-		}
-		let additionalInfo = facility.attributes.operating_status.additional_info;
-		if (additionalInfo === undefined) {
-			additionalInfo = ""
-		}
-		if (website !== null) {
-			name = `<a href="${facility.attributes.website}" target="_blank">${facility.attributes.name} <i class="fas fa-external-link-alt" aria-hidden="true"></i></a>`;
-		}
-
-		if (address2 === null) {
-			address2 = "Unavailable"
-		}
-
-		var tr = document.createElement('tr');
-		tr.innerHTML  = `<td><p>` + name + `</p><p>` + facility.attributes.phone.main +`</p></td><td><p>` + facility.attributes.address.physical.address_1 +`<br />`+ address2 +`<br />`+facility.attributes.address.physical.city+`, `+facility.attributes.address.physical.state+` `+facility.attributes.address.physical.zip + `</p></td><td><p>Operating Status: ${code}</p><p>${additionalInfo}<p></td>`;
-		resultsTableBody.appendChild(tr);
-	});
-
-	resultsTable.appendChild(resultsTableBody);
-	resultsTable.appendChild(resultsTableFoot);
-	//append table to table div wrapper
-	tableWrap.appendChild(resultsTable);
-};
 
 const getPage = (e) => {
 	e.preventDefault();
+
   // href of anchor pagination cells initialized with url string from database response, now the target event
 	let link = e.srcElement.attributes.href.value;
 	if (link === '#') {
@@ -313,18 +249,26 @@ function enableFormInputs(which){
 	let zipdiv = document.getElementById("address3");
 	let zipinput = document.getElementById("userZip");
 
+	let zipOptions = document.getElementById("zip-options");
+	let zipnearby = document.getElementById("zip-nearby");
+	let zipwithin = document.getElementById("within-zip");
+
 	switch(which) {
   case "state-only":
 
 		statediv.classList.remove("va-hide");
 		streetdiv.classList.add("va-hide");
 		zipdiv.classList.add("va-hide");
+		zipOptions.classList.add("va-hide");
+		// when hiding the zip options div with va-hide, must remove va-radio-buttons which has display: flex
+		zipOptions.classList.remove("va-radio-buttons");
 
     stateinput.removeAttribute("disabled");
 		streetinput.setAttribute("disabled", true);
 		cityinput.setAttribute("disabled", true);
 		zipinput.setAttribute("disabled", true);
-
+		zipnearby.setAttribute("disabled", true);
+		zipwithin.setAttribute("disabled", true);
 
     break;
   case "zip-only":
@@ -332,24 +276,31 @@ function enableFormInputs(which){
 	statediv.classList.add("va-hide");
 	streetdiv.classList.add("va-hide");
 	zipdiv.classList.remove("va-hide");
-
+  zipOptions.classList.remove("va-hide");
+	zipOptions.classList.add("va-radio-buttons");
 
 	stateinput.setAttribute("disabled", true);
 	streetinput.setAttribute("disabled", true);
 	cityinput.setAttribute("disabled", true);
 	zipinput.removeAttribute("disabled");
-
+	zipnearby.removeAttribute("disabled");
+	zipwithin.removeAttribute("disabled");
     break;
+
 	case "full-address":
 
 	statediv.classList.remove("va-hide");
 	streetdiv.classList.remove("va-hide");
 	zipdiv.classList.remove("va-hide");
+	zipOptions.classList.add("va-hide");
+	zipOptions.classList.remove("va-radio-buttons");
 
 	stateinput.removeAttribute("disabled");
 	cityinput.removeAttribute("disabled");
 	streetinput.removeAttribute("disabled");
 	zipinput.removeAttribute("disabled");
+	zipnearby.setAttribute("disabled", true);
+	zipwithin.setAttribute("disabled", true);
 
 	cityinput.setAttribute("required", true);
 	streetinput.setAttribute("required", true);

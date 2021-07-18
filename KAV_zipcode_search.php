@@ -50,11 +50,19 @@ array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( '
 check_ajax_referer( 'kav-zipcode-nonce', 'nonce_data' );
  //$link = $domain . $_POST['link'];
  $link = $_POST['link'];
+ $getTable = $_POST['getTable'];
  if(isset($link)){
-    $data = query_VA_api($link);
-    echo $data;
-    unset($data);
-  }
+       if($getTable == 'true'){
+         $table = query_VA_api_buildTable($link);
+         echo $table;
+         unset($table);
+          }
+       if($getTable == 'false') {
+        $data = query_VA_api_fullResponse($link);
+        echo $data;
+       unset($data);
+            }
+      }
   else { echo '{"error": "server error"}';}
   // will die() if client nonce does not check out
  die();// wordpress may print out a spurious zero without this - can be particularly bad if using json
