@@ -25,7 +25,6 @@ function changeForm(e){
 function zipSub(e){
 	e.preventDefault();
 var arr = jQuery("#zipForm").serializeArray();
-console.log(arr);
 
 		if(arr[1].name === "state"){
 					if(arr[1].value === ""){return alert("please choose a state");}
@@ -40,12 +39,13 @@ console.log(arr);
 			if(arr[1].value === ""){return alert("zipcode value is blank or invalid");}
 			else if (isNaN(arr[1].value)){return alert("enter 5 digit zipcode with numbers only");}
 			else {
-						if(arr[2].value === "within-zip"){
 					var state = getzipState(arr[1].value, states);
-					vso(state);
-					buildVa(createLinkZip(arr[1].value)); }
+						if(arr[2].value === "within-zip"){
+			  		vso(state);
+				  	buildVa(createLinkZip(arr[1].value)); }
 					else {
-					queryNearby(createNearbyZipLink(arr[1].value));
+							vso(state);
+				  	queryNearby(createNearbyZipLink(arr[1].value));
 					}
 			}
 		}
@@ -53,7 +53,7 @@ console.log(arr);
 		if(arr[1].name === "address"){
 			var state = getStateAbbr(arr[3].value, states);
 			vso(state);
-		 queryNearby(createNearbyLink(arr));
+			 queryNearby(createNearbyLink(arr));
 		}
 
 };
@@ -67,9 +67,10 @@ return link;
 //adds params for nearby street address
 const createNearbyLink = (_queryArr) => {
 	if(_queryArr.length > 2 ){
-	let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value+'&city='+_queryArr[2].value+'&state='+_queryArr[3].value+'&zip='+_queryArr[4].value+'&drive_time=90';
+	let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value.trim()+'&city='+_queryArr[2].value.trim()+'&state='+_queryArr[3].value.trim()+'&zip='+_queryArr[4].value.trim()+'&drive_time=90';
+  return link;
 	}
-	return link;
+
 }
 // add params with id string
 const createLinkIDs = (_idStr) => {
@@ -109,7 +110,7 @@ const queryNearby = (_link) => {
 	      action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
 			 link : _link,
 		   getTable : "false",
-	      nonce_data : the_ajax_script.nonce, // PHP: $_POST['nonce_data']
+	      nonce_data : the_ajax_script.nonce,
 	   }
 	 })
 	 .done(function (response) {
@@ -121,7 +122,6 @@ const queryNearby = (_link) => {
             let idStr = idArray.join(',');
 						buildVa(createLinkIDs(idStr));
 
-						console.log(response);
 
 	}).fail(function (errorThrown){
 
@@ -143,30 +143,15 @@ jQuery("#status-message").html('loading...');
        action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
 			 link : _link,
 			 getTable : "true",
-       nonce_data : the_ajax_script.nonce, // PHP: $_POST['nonce_data']
+       nonce_data : the_ajax_script.nonce,
    }
 
  }).done(function (response) {
 
-//let parsed = JSON.parse(response);
-	//	if(parsed.table && parsed.table === "is here"){
-			console.log(response);
-			console.log(typeof response);
 			jQuery("#status-message").html('');
 			jQuery("#zip-results").html(response);
 	hideOrDisableVAButtons(false);
-	//	}
-	/*	else {
-jQuery("#status-message").html('');
-hideOrDisableVAButtons(false);
-	 // if .errors property exists, came from VA.gov API
-	 if(parsed.errors){jQuery("#status-message").text(parsed.errors[0].title); }
-	 //if .error property exists, added by our WP server code
-	 else if(parsed.error){jQuery("#status-message").html(parse.error); }
-	 else if(!parsed.data){jQuery("#status-message").html('server error');}
-	 else{
- 		processVaResponse(parsed);}
-	}*/
+
 }).fail(function (errorThrown){
 	hideOrDisableVAButtons(false);
 	// error thrown from .fail will be from JQuery ajax error
@@ -175,10 +160,17 @@ hideOrDisableVAButtons(false);
 };
 
 const vso = (_state) => {
-if(_state){
+/*if(_state){
 	jQuery('#vso-results > h6 > a').text('State Veterans Services Office for  ' + _state.long).attr("href", _state.svao);
 	jQuery('#vso-results > p > a').text(_state.svao).attr("href", _state.svao);
-   }
+}*/
+if(_state){
+	jQuery('#vso-results').html(
+		'<h6><a target="blank" alt="VA information for your state">State Veterans Services Office for '+ _state.long + '</a></h6>'+
+		'<p><a href=" '+ _state.svao +' " target="_blank" aria-hidden="true">'+ _state.svao +'</a></p>'
+	)
+
+}
 };
 //currently unused function, may incorporate at a later time for outputting Auntbertha results
 /*const buildAuntBerta = (zip) => {

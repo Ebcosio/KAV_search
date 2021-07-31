@@ -60,15 +60,14 @@ or any full street address.
 </form>
 
  <div id="vso-results">
-<h6><a target="blank" alt="VA information for your state"></a></h6>
-<p><a target="_blank" aria-hidden="true"></a></p>
+
  </div>
- <p id="status-message" style="font-size: 16px;"></p>
- <div id="zip-results">
+ <p id="status-message" role="alert" style="font-size: 16px;"></p>
+ <div id="zip-results" role="region" aria-label="VA search results will display here">
 
 
  </div>
-<p class="blah">TEST CSS</p>
+
 <script>
 // states array should be in external JS; if it reads, function is called below to build form options
 if(states !== undefined || states !== null){

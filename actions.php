@@ -10,12 +10,16 @@ function query_VA_api_fullResponse($_link){
                 )
     );
     if( is_wp_error( $response ) ) {
-        $data = '{"error": "server error"}';
+        $data = 'VA.gov server error';
         return $data;
     }
     else{
     $data = wp_remote_retrieve_body( $response );
-    return $data;
+    $parsed = json_decode($data, true);
+    // condition below checks for 'errors' property, if errors sent from Va.gov
+    if($parsed['errors']){return $parsed['errors'][0]['title'] ? $parsed['errors'][0]['title'] : 'VA.gov server error';}
+      else {
+      return $data; }
      }
 }
 
@@ -27,20 +31,23 @@ function query_VA_api_buildTable($_link){
               )
   );
   if( is_wp_error( $response ) ) {
-      $data = '{"error": "server error"}';
+      $data = 'VA.gov server error';
       return $data;
   }
   else{
-  $body = wp_remote_retrieve_body( $response );
-  $data = json_decode($body, true);
-  $facilities = $data['data'];
-  $total_pages = $data['meta']['pagination']['total_pages'];
-  $current_page = $data['meta']['pagination']['current_page'];
-  $total_entries = $data['meta']['pagination']['total_entries'];
-  $prev = $data['links']['prev'];
-  $next = $data['links']['next'];
 
-//  facility.attributes.website;
+    $body = wp_remote_retrieve_body( $response );
+    $data = json_decode($body, true);
+    // check for 'errors' property if sent from Va. gov
+      if($data['errors']){return $parsed['errors'][0]['title'] ? $parsed['errors'][0]['title'] : 'VA.gov server error';}
+      else {
+    $facilities = $data['data'];
+    $total_pages = $data['meta']['pagination']['total_pages'];
+    $current_page = $data['meta']['pagination']['current_page'];
+    $total_entries = $data['meta']['pagination']['total_entries'];
+    $prev = $data['links']['prev'];
+    $next = $data['links']['next'];
+
 
   ob_start();
   ?>
@@ -52,7 +59,7 @@ function query_VA_api_buildTable($_link){
 <tbody>
   <?php
   foreach ($facilities as $fac):
-  //$fac = $data['data'][0];
+
   $name = $fac['attributes']['name'];
   $fac_type = $fac['attributes']['facility_type'];
   $address = $fac['attributes']['address']['physical'];
@@ -84,26 +91,26 @@ function query_VA_api_buildTable($_link){
 </table>
 
 </div> <!-- closes va tabel  container  -->
-<div class="pagination-wrapper">
-  <div class="va-table-message va-hide" style="">
+<div class="pagination-wrapper" role="navigation" aria-label="VA results navigation">
+  <div class="va-table-message va-hide" role="alert">
     Loading results, please wait...
   </div>
   <div class="va-table-pagination">
-    <span id="va-prev"><?php if($prev){ echo '  <a href="'.$prev.'" onclick="getPage(event)"><< Prev</a>';  }  ?></span>
+    <span id="va-prev"><?php if($prev){ echo '  <a role="button" alt="scroll to previous results page" href="'.$prev.'" onclick="getPage(event)"><< Prev</a>';  }  ?></span>
     <span id="va-page-number">Page <?php  echo $current_page;  ?> of <?php  echo $total_pages;  ?></span>
-    <span id="va-next"><?php if($next){ echo '  <a href="'.$next.'" onclick="getPage(event)">Next >></a>';  }  ?></span>
+    <span id="va-next"><?php if($next){ echo '  <a role="button" alt="scroll to next results page"  href="'.$next.'" onclick="getPage(event)">Next >></a>';  }  ?></span>
   </div>
 </div>
 
   <?php
   $_table = ob_get_clean();
   return $_table;
+      } // closes inner else statement encapsulating the table html code
 
 
-  //return $data;
-   }
+   }// closes outer else statement
 
-}
+} // closes function
 
 
  ?>
