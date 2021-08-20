@@ -27,18 +27,15 @@ wp_register_script('my-ajax-handle', plugin_dir_url( __FILE__ ) . 'search_ajax.j
 wp_register_style( 'results-styling', plugins_url( 'results.css' , __FILE__ ));
 
 function localize_ajax_functions() {
-//  $post = get_page(get_the_ID());
-//  if( has_shortcode( $post->post_content, 'zipcode_form_kav') ) {
-// below condition will check for various pages within the site, ex. page title or ID or frontpage
-// don't load the JS file in pages that dont need it!
-if(get_the_title() == "Self Help" || get_the_ID() == "12322"){
+  $post = get_page(get_the_ID());
+  if( has_shortcode( $post->post_content, 'zipcode_form_kav') ) {
+
  wp_enqueue_script('my-ajax-handle');
  wp_enqueue_style('results-styling');
 wp_localize_script( 'my-ajax-handle', 'the_ajax_script',
 array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'kav-zipcode-nonce' )));
-//      }
-  }
-//  unset($post);
+      }
+  unset($post);
 }
 
  add_action( 'wp_enqueue_scripts', 'localize_ajax_functions' );
@@ -53,17 +50,18 @@ check_ajax_referer( 'kav-zipcode-nonce', 'nonce_data' );
  $getTable = $_POST['getTable'];
  if(isset($link)){
        if($getTable == 'true'){
-         $table = query_VA_api_buildTable($link);
+        $table = query_VA_api_buildTable($link);
          echo $table;
          unset($table);
           }
-       if($getTable == 'false') {
-        $data = query_VA_api_fullResponse($link);
+      else if($getTable == 'false') {
+     $data = query_VA_api_fullResponse($link);
         echo $data;
        unset($data);
             }
+      else {echo 'server error';}
       }
-  else { echo '{"error": "server error"}';}
+  else { echo 'server error';}
   // will die() if client nonce does not check out
  die();// wordpress may print out a spurious zero without this - can be particularly bad if using json
  }

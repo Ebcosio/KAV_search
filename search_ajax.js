@@ -31,7 +31,8 @@ var arr = jQuery("#zipForm").serializeArray();
 					else {
 					var state = getStateAbbr(arr[1].value, states);
 					vso(state);
-					buildVa(createLinkState(arr[1].value));
+					buildVa(createLinkState(arr[1].value.trim()));
+
 				}
 		}
 		if(arr[1].name === "zipcode"){
@@ -42,10 +43,10 @@ var arr = jQuery("#zipForm").serializeArray();
 					var state = getzipState(arr[1].value, states);
 						if(arr[2].value === "within-zip"){
 			  		vso(state);
-				  	buildVa(createLinkZip(arr[1].value)); }
+				  	buildVa(createLinkZip(arr[1].value.trim())); }
 					else {
 							vso(state);
-				  	queryNearby(createNearbyZipLink(arr[1].value));
+				  	queryNearby(createNearbyZipLink(arr[1].value.trim()));
 					}
 			}
 		}
@@ -60,31 +61,31 @@ var arr = jQuery("#zipForm").serializeArray();
 
 //adds params for nearby with zip only query; other queries an empty string
 const createNearbyZipLink = (zipStr) => {
-let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address=na&city=na&state=na&zip=' + zipStr + '&drive_time=90';
+let	link = 'https://api.va.gov/services/va_facilities/v0/nearby?street_address=na&city=na&state=na&zip=' + zipStr + '&drive_time=90';
 return link;
 }
 
 //adds params for nearby street address
 const createNearbyLink = (_queryArr) => {
 	if(_queryArr.length > 2 ){
-	let	link = 'https://sandbox-api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value.trim()+'&city='+_queryArr[2].value.trim()+'&state='+_queryArr[3].value.trim()+'&zip='+_queryArr[4].value.trim()+'&drive_time=90';
+	let	link = 'https://api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value.trim()+'&city='+_queryArr[2].value.trim()+'&state='+_queryArr[3].value.trim()+'&zip='+_queryArr[4].value.trim()+'&drive_time=90';
   return link;
 	}
 
 }
 // add params with id string
 const createLinkIDs = (_idStr) => {
-   let link = 'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?ids=' + _idStr +'&per_page=20';
+   let link = 'https://api.va.gov/services/va_facilities/v0/facilities?ids=' + _idStr +'&per_page=20';
 	return link;
 }
 // add params with zip, etc...
 const createLinkZip = (_zip) => {
-	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?zip=' + _zip + '&per_page=20';
+	let link =	'https://api.va.gov/services/va_facilities/v0/facilities?zip=' + _zip + '&per_page=20';
 	return link;
 }
 
 const createLinkState = (state) => {
-	let link =	'https://sandbox-api.va.gov/services/va_facilities/v0/facilities?state=' + state + '&per_page=20';
+	let link =	'https://api.va.gov/services/va_facilities/v0/facilities?state=' + state + '&per_page=20';
 	return link;
 }
 
@@ -117,14 +118,14 @@ const queryNearby = (_link) => {
 			jQuery("#status-message").html('');
              //Va response contains facility id's in each Json array element
             let parsed = JSON.parse(response);
+						if(parsed.errors || !parsed.data){	jQuery("#status-message").html(parsed.errors ? parsed.errors : 'server error');}
+						else{
 						 // we may eventually need to store idArray values in DOM, for further querying of API
             let idArray = parsed.data.map(el => {return el.id;});
             let idStr = idArray.join(',');
 						buildVa(createLinkIDs(idStr));
-
-
+					}
 	}).fail(function (errorThrown){
-
 	jQuery("#status-message").html(errorThrown.status + ' ' + errorThrown.statusText);})
 }
 
@@ -150,8 +151,7 @@ jQuery("#status-message").html('loading...');
 
 			jQuery("#status-message").html('');
 			jQuery("#zip-results").html(response);
-	hideOrDisableVAButtons(false);
-
+     	hideOrDisableVAButtons(false);
 }).fail(function (errorThrown){
 	hideOrDisableVAButtons(false);
 	// error thrown from .fail will be from JQuery ajax error
@@ -160,14 +160,11 @@ jQuery("#status-message").html('loading...');
 };
 
 const vso = (_state) => {
-/*if(_state){
-	jQuery('#vso-results > h6 > a').text('State Veterans Services Office for  ' + _state.long).attr("href", _state.svao);
-	jQuery('#vso-results > p > a').text(_state.svao).attr("href", _state.svao);
-}*/
+
 if(_state){
 	jQuery('#vso-results').html(
-		'<h6><a target="blank" alt="VA information for your state">State Veterans Services Office for '+ _state.long + '</a></h6>'+
-		'<p><a href=" '+ _state.svao +' " target="_blank" aria-hidden="true">'+ _state.svao +'</a></p>'
+		'<h6><a target="blank" alt="VA information for your state">State Veterans Services Office for '+ _state.long + '</a></h6>'
+	//	'<p><a href=" '+ _state.svao +' " target="_blank" aria-hidden="true">'+ _state.svao +'</a></p>'
 	)
 
 }
@@ -212,7 +209,8 @@ let fullstate = getFullState(stateAbbr, states);*/
 function renderFormMenu(_states){
 		let form = document.getElementById("zipForm");
 		if(form){
-		 form.classList.remove("va-hide");
+			//use inline display: none; to hide form on initial page load.  This catches any errors in case JS file doesn't load
+		form.removeAttribute("style");
 		   }
 		let selectState = document.getElementById("choose-state");
 		if(selectState){
@@ -225,6 +223,7 @@ function renderFormMenu(_states){
 				selectState.appendChild(opt);
 
 			})
+			// initial state of form is for search by state
 			enableFormInputs("state-only");
 		}
 

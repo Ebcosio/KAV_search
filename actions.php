@@ -2,6 +2,7 @@
 include_once('keys.php');
 include_once('actions_helpers.php');
 
+
 function query_VA_api_fullResponse($_link){
     $mykey = getVAkey();
     $response = wp_remote_get( $_link,
@@ -10,17 +11,13 @@ function query_VA_api_fullResponse($_link){
                 )
     );
     if( is_wp_error( $response ) ) {
-        $data = 'VA.gov server error';
+        $data = '{"errors" : "VA.gov server error"}';
         return $data;
     }
     else{
     $data = wp_remote_retrieve_body( $response );
-    $parsed = json_decode($data, true);
-    // condition below checks for 'errors' property, if errors sent from Va.gov
-    if($parsed['errors']){return $parsed['errors'][0]['title'] ? $parsed['errors'][0]['title'] : 'VA.gov server error';}
-      else {
-      return $data; }
-     }
+      return $data;
+    }
 }
 
 function query_VA_api_buildTable($_link){
@@ -31,15 +28,14 @@ function query_VA_api_buildTable($_link){
               )
   );
   if( is_wp_error( $response ) ) {
-      $data = 'VA.gov server error';
-      return $data;
+      return 'VA.gov server error';
   }
   else{
 
     $body = wp_remote_retrieve_body( $response );
     $data = json_decode($body, true);
     // check for 'errors' property if sent from Va. gov
-      if($data['errors']){return $parsed['errors'][0]['title'] ? $parsed['errors'][0]['title'] : 'VA.gov server error';}
+      if($data['errors'] || !$data['data']){return $data['errors'][0]['title'] ? $data['errors'][0]['title'] : 'VA.gov server error';}
       else {
     $facilities = $data['data'];
     $total_pages = $data['meta']['pagination']['total_pages'];

@@ -1,6 +1,8 @@
 
 
-form.va-search-form{background-color: WhiteSmoke !important; padding: 5px; padding-bottom: 2px; border-radius: 5px; }
+form.va-search-form{background-color: WhiteSmoke !important; padding: 5px; padding-bottom: 2px; border-radius: 5px;
+width: 90%; max-width: 700px;  margin-top: 5px; margin-left: auto; margin-right: auto; float: none;
+}
 form.va-search-form div{text-align: center; background-color: lightgray; border-width: 1px; border-color: black;
   border-radius: 5px; padding: 10px; margin: 2px;}
 form.va-search-form div.va-radio-buttons label{font-weight: 600; margin-bottom: 0;}
@@ -12,7 +14,8 @@ background-color: lightgray;
 }
 form.va-search-form input[type="text"]{background-color: white;}
 form.va-search-form input[type="submit"]{margin-top: 5px; font-weight: bold; cursor: pointer;
- border-radius: 5px; background-color: gray; width: 15em;}
+ border-radius: 5px; background-color: #b3b3ff; width: 15em; color: black;}
+form.va-search-form input[type="submit"]:hover{background-color: #668cff;}
 
 #userZip{width: 10em; margin-left: auto; margin-right: auto;}
 
@@ -24,10 +27,13 @@ form.va-search-form input[type="submit"]{margin-top: 5px; font-weight: bold; cur
 form.va-search-form.va-hide{display: none;}
 div.va-form-inputgroup.va-hide{display: none;}
 
+#zip-results{margin-left: auto; margin-right: auto;}
 
-#va-table-wrapper{width: 720px; max-height: 600px; overflow: auto; }
+#va-table-wrapper{width: 720px; max-height: 600px; overflow: auto; float:
+  none; margin-left: auto; margin-right: auto; }
+
 table.va-results-table{width: 700px;  border-width: 1px; border-color: black; border-radius: 5px;
- table-layout: fixed;}
+ table-layout: fixed; margin-left: auto; margin-right: auto; float: none; color: black !important;}
 
  /*#va-table-wrapper table.va-results-table tbody tr td:last-of-type{}*/
  #va-table-wrapper table.va-results-table caption {
@@ -60,25 +66,25 @@ table.va-results-table td:last-of-type {
 
 #va-table-wrapper table.va-results-table > tbody > tr > td {min-width: 33%;}
 
-div.pagination-wrapper{width: 700px; font-family: 'Libre Franklin', sans-serif;}
-div.va-table-message{width: 100%; background: #28a745; height: 6em; color: white; width: 100%;}
+div.pagination-wrapper{width: 700px; font-family: 'Libre Franklin',
+sans-serif; float: none; margin-left: auto; margin-right: auto; margin-top: 4px;
+border-radius: 0px 0px 5px 5px;}
+div.va-table-message{width: 100%; background: #28a745; height: 6em; color: white; border-radius: inherit;}
 div.va-table-message.va-hide{display: none;}
 
-table.va-results-table > tfoot > tr.va-table-message > td{width: 100%; height: inherit;
-  background: #28a745; color: white; text-align: center;}
-
-div.va-table-pagination{width: 100%; display: inline-block; height: 6em; background-color: #17a2b8; padding: 1px;}
+div.va-table-pagination{width: 100%; display: flex; flex-direction: row; flex-wrap: nowrap;
+  height: 6em; background-color: #17a2b8; padding: 1px; border-radius: inherit;}
 div.va-table-pagination.va-hide{display: none;}
-div.va-table-pagination > span {display: inline-block; margin: 2px; height: 5em; text-align: center; padding: 2px; }
-div.va-table-pagination > #va-prev{ width: 25%; background-color: inherit; float: left;}
-  div.va-table-pagination > #va-page-number{width: 40%; background-color: lightgray; height: 5em; margin-left: auto; margin-right: auto;}
-    div.va-table-pagination > #va-next{width: 25%; background-color: inherit; float: right;}
-div.va-table-pagination > span > a {
-    position: relative; top: 20px; border: none;
-    margin: 2px; margin-top: 3px; color: black; font-size: 20px; padding: 1em; text-decoration: none;
+div.va-table-pagination > span { margin: 2px; height: 5em; text-align: center; padding: 2px;}
+div.va-table-pagination > #va-prev{ width: 25%; background-color: inherit;}
+  div.va-table-pagination > #va-page-number{width: 50%; background-color: lightgray; height: 5em; margin-left: auto; margin-right: auto;}
+    div.va-table-pagination > #va-next{width: 25%; background-color: inherit;}
+div.pagination-wrapper > div.va-table-pagination > span > a {
+  display: inline-block; width: 90%; height: 90%; border: none; font-size: 14px;
+    margin: 2px; margin-top: 5px; color: black !important; font-size: 20px; padding: 10px; text-decoration: none !important;
 }
 
-div.va-table-pagination > span > a:hover {
+div.pagination-wrapper > div.va-table-pagination > span > a:hover {
   color: blue; background-color: lightgray;
    }
 
@@ -91,7 +97,7 @@ div.va-table-pagination > span > a:hover {
     padding: 0 7px;
 }
 #vso-results a {
-    text-decoration: underline; color: blue;
+    text-decoration: underline; color: blue !important;
 }
 #vso-results h6 {
 	color: #777;
@@ -111,15 +117,16 @@ div.va-table-pagination > span > a:hover {
 	table.va-results-table{width: 400px; font-size: 12px; }
 	div.pagination-wrapper{width: 400px; margin-left: 20px; font-size: 12px; float: left; }
 
-	div.pagination-wrapper > div.va-table-pagination > span > a {padding: 10px; width: auto;}
+	div.pagination-wrapper > div.va-table-pagination  span > a {padding: 5px; width: auto; font-size: 12px;}
     }
 
 
     @media only screen and (max-width: 600px) {
     #va-table-wrapper{width: 300px; overflow: auto;
     max-height: 300px; 	margin-left: 20px; float: left;}
-    	table.va-results-table{width: 290px; font-size: 12px; color: green;}
+    	table.va-results-table{width: 290px; font-size: 12px;}
     	div.pagination-wrapper{width: 290px; margin-left: 20px; font-size: 12px; float: left;}
-        }
-    div.pagination-wrapper > div.va-table-pagination > span > a {padding: 2px; width: auto; font-size: 14px; }
+
+    div.pagination-wrapper > div.va-table-pagination span > a {padding: 2px; width: auto; font-size: 12px;
+      }
     }

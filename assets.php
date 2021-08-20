@@ -4,7 +4,7 @@ function get_theForm(){
 
 ob_start();
 ?>
-<form class="va-search-form va-hide" id="zipForm" onsubmit="zipSub(event)">
+<form class="va-search-form" id="zipForm" onsubmit="zipSub(event)" style="display: none;">
 <h4 style="text-align: center;">Search VA.gov for Facilities</h4>
 <p>Search Nearby Address or Nearby Zipcode finds VA facilities within estimated 90 minutes drive time.  You may use a home address,
 or any full street address.
@@ -62,7 +62,7 @@ or any full street address.
  <div id="vso-results">
 
  </div>
- <p id="status-message" role="alert" style="font-size: 16px;"></p>
+ <p id="status-message" role="alert" style="font-size: 16px; min-height: 1.5em; margin: 1px;"></p>
  <div id="zip-results" role="region" aria-label="VA search results will display here">
 
 
