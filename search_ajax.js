@@ -71,6 +71,7 @@ const createNearbyLink = (_queryArr) => {
 	let	link = 'https://api.va.gov/services/va_facilities/v0/nearby?street_address='+_queryArr[1].value.trim()+'&city='+_queryArr[2].value.trim()+'&state='+_queryArr[3].value.trim()+'&zip='+_queryArr[4].value.trim()+'&drive_time=90';
   return link;
 	}
+	else{jQuery("#status-message").html('the search form has incomplete information');}
 
 }
 // add params with id string
@@ -100,7 +101,7 @@ var messageRow = document.getElementsByClassName("va-table-message")[0];
 }
 
 const queryNearby = (_link) => {
-	// getTable arg is a boolean
+
 	jQuery("#status-message").html('Searching VA facilities.  This may take a moment...');
 	  jQuery.ajax({
 	    type: "POST",
@@ -118,19 +119,23 @@ const queryNearby = (_link) => {
 			jQuery("#status-message").html('');
              //Va response contains facility id's in each Json array element
             let parsed = JSON.parse(response);
-						if(parsed.errors || !parsed.data){	jQuery("#status-message").html(parsed.errors ? parsed.errors : 'server error');}
+						// check for errors message, no data property, or no id property in first element of data array
+						if(parsed.errors || !parsed.data){
+							jQuery("#status-message").html(parsed.errors ? parsed.errors : 'server error'); return;
+								}
+						else if(!parsed.data[0].id){ jQuery("#status-message").html('no local VA facilities found'); return; }
 						else{
 						 // we may eventually need to store idArray values in DOM, for further querying of API
-            let idArray = parsed.data.map(el => {return el.id;});
-            let idStr = idArray.join(',');
-						buildVa(createLinkIDs(idStr));
+						 let idArray = parsed.data.map(el => {return el.id;});
+			    	 let idStr = idArray.join(',');
+             buildVa(createLinkIDs(idStr));
 					}
 	}).fail(function (errorThrown){
 	jQuery("#status-message").html(errorThrown.status + ' ' + errorThrown.statusText);})
 }
 
 const buildVa = (_link) => {
-	//renderTable arg is a boolean
+
 jQuery("#status-message").html('loading...');
 	hideOrDisableVAButtons(true);
   jQuery.ajax({
@@ -138,8 +143,7 @@ jQuery("#status-message").html('loading...');
 		timeout: 6000,
 		async: true,
    url: the_ajax_script.ajaxurl,
-	// dataType: 'text',
-//	 contentType: "text/plain",
+
    data: {
        action : 'the_ajax_hook', // wp_ajax_*, wp_ajax_nopriv_*
 			 link : _link,
@@ -148,7 +152,6 @@ jQuery("#status-message").html('loading...');
    }
 
  }).done(function (response) {
-
 			jQuery("#status-message").html('');
 			jQuery("#zip-results").html(response);
      	hideOrDisableVAButtons(false);
@@ -163,7 +166,7 @@ const vso = (_state) => {
 
 if(_state){
 	jQuery('#vso-results').html(
-		'<h6><a target="blank" alt="VA information for your state">State Veterans Services Office for '+ _state.long + '</a></h6>'
+		'<p id="state-vet-link">Department of Veterans Affairs website for <a target="blank" href='+  _state.svao +'>'+ _state.long + '</a></p>'
 	//	'<p><a href=" '+ _state.svao +' " target="_blank" aria-hidden="true">'+ _state.svao +'</a></p>'
 	)
 

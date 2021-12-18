@@ -28,7 +28,7 @@ form.va-search-form.va-hide{display: none;}
 div.va-form-inputgroup.va-hide{display: none;}
 
 #zip-results{margin-left: auto; margin-right: auto;}
-
+#state-vet-link{font-size: 20px; font-weight: 600; margin: 10px;}
 #va-table-wrapper{width: 720px; max-height: 600px; overflow: auto; float:
   none; margin-left: auto; margin-right: auto; }
 
@@ -51,6 +51,7 @@ table.va-results-table{width: 700px;  border-width: 1px; border-color: black; bo
 #va-table-wrapper table.va-results-table tbody tr td a{color: blue; text-decoration: underline;}
 #va-table-wrapper table.va-results-table tbody tr td a:visited {color: red;}
 #va-table-wrapper table.va-results-table tbody tr td a:hover {color: purple;}
+#va-table-wrapper table.va-results-table tbody tr td > p > a.va-phone{text-decoration: none;}
 
 table.va-results-table caption {
 	 font-family: 'Libre Franklin', sans-serif;
