@@ -13,6 +13,7 @@ function query_VA_api_fullResponse($_link){
     if( is_wp_error( $response ) ) {
         $data = '{"errors" : "VA.gov server error"}';
         return $data;
+
     }
     else{
     $data = wp_remote_retrieve_body( $response );
@@ -35,7 +36,8 @@ function query_VA_api_buildTable($_link){
     $body = wp_remote_retrieve_body( $response );
     $data = json_decode($body, true);
     // check for 'errors' property if sent from Va. gov
-      if($data['errors'] || !$data['data']){return $data['errors'][0]['title'] ? $data['errors'][0]['title'] : 'VA.gov server error';}
+    //if so, return a string with the error message, not JSON
+      if($data['errors']){return $data['errors'][0]['title'] ? $data['errors'][0]['title'] : 'VA.gov server error';}
       else {
     $facilities = $data['data'];
     $total_pages = $data['meta']['pagination']['total_pages'];
@@ -77,7 +79,7 @@ function query_VA_api_buildTable($_link){
         echo '<p>'.$address['address_1'] . ' ' . $address['address_2'].'</p>'.
          '<p>'.$address['city'].', '.$address['state'].' '.$address['zip'].'</p>';?></td>
         <td>
-        <?php echo '<p>Operating Status: '.$isOpen.'</p>'; echo '<p>Main Tel: '.$mainPhone.'</p>';
+        <?php echo '<p>Operating Status: '.$isOpen.'</p>'; echo '<p>Main Tel: <a class="va-phone" href="tel: '.$mainPhone.' "> '.$mainPhone.'</a></p>';
        echo get_googlemaps($lat, $long, $name);
         ?>
         </td>
