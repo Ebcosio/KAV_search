@@ -21,7 +21,7 @@ function query_VA_api_fullResponse($_link){
     }
 }
 
-function query_VA_api_buildTable($_link){
+function query_VA_api_buildTable($_link, $statename){
   $mykey = getVAkey();
   $response = wp_remote_get( $_link,
   array( 'timeout' => 5,
@@ -32,7 +32,8 @@ function query_VA_api_buildTable($_link){
       return 'VA.gov server error';
   }
   else{
-
+//  'post_type' => 'kav-vso',
+    // code to get data from VA API response
     $body = wp_remote_retrieve_body( $response );
     $data = json_decode($body, true);
     // check for 'errors' property if sent from Va. gov
@@ -46,9 +47,41 @@ function query_VA_api_buildTable($_link){
     $prev = $data['links']['prev'];
     $next = $data['links']['next'];
 
+    // code to get state vso data from KAV custom post type, by title of post which is the state name
+    if($statename && $statename !== 'none'){
+        $args = array('numberposts' => 1, 'post_type' => 'kav-vso', 'title' => $statename,  'fields' => 'ids');
+        $stateCPT_id = get_posts( $args );
+        if(isset($stateCPT_id))
+        { 
+            $content = get_post_field('post_content', $stateCPT_id[0]); 
+            $vso_title = get_post_field('post_title', $stateCPT_id[0]); 
+            $webaddress = get_post_meta( $stateCPT_id[0], 'webaddress', true );
+            $webname = get_post_meta( $stateCPT_id[0], 'webname', true );
+        }
+        
+    }
 
   ob_start();
   ?>
+  
+      <form id="state-va-data" style="display: none;">
+          <?php  if( $webname){
+            ?>
+           <input type="hidden" name="StateVSOData" value="yes">
+           <input type="hidden" name="title" value="<?php echo  $vso_title ? $vso_title : '';  ?>">
+           <input type="hidden" name="webname" value="<?php echo  $webname ? $webname : '';  ?>">
+           <input type="hidden" name="webaddress" value="<?php echo   $webaddress ? $webaddress : '';  ?>">
+           <input type="hidden" name="content" value="<?php echo   $content ? $content : '';  ?>">
+            
+             <?php } else {  ?>
+             <input type="hidden" name="StateVSOData" value="no">
+             <?php } ?>
+             
+      </form>
+      
+  
+     <?php // if( $statename === "none"){echo 'no state entered!!!';}   ?>
+     
   <h4 style="text-align: center;"><?php echo $total_entries; ?> facilities located. 20 per page.</h4>
   <h5 style="text-align: center;">Page <?php  echo $current_page;  ?> of <?php  echo $total_pages;  ?></h5>
   <div id="va-table-wrapper" tabindex="0">

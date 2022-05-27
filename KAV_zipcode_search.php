@@ -18,24 +18,30 @@ define('KAV_ZIPCODE_SEARCH_TRANS', 'kav-zipcode-search-plugin');
 
 
  include_once('assets.php');
-  include_once('actions.php');
+ include_once('actions.php');
 
 // enqueue and localise scripts
 
-wp_register_script('my-ajax-handle', plugin_dir_url( __FILE__ ) . 'search_ajax.js', array( 'jquery' ));
+// go ahead and enqueu this in the header for every page; may need for other entry forms
+wp_register_script('states-js', plugin_dir_url( __FILE__ ) . 'statesobj.js', array( 'jquery' ), '1', true);
+
+
+// conditional enqueue the below script/style only if page contains the shortcode.  Place in footer
+wp_register_script('my-ajax-handle', plugin_dir_url( __FILE__ ) . 'search_ajax.js', array( 'jquery' ), '2', true);
 
 wp_register_style( 'results-styling', plugins_url( 'results.css' , __FILE__ ));
 
 function localize_ajax_functions() {
-  $post = get_page(get_the_ID());
-  if( has_shortcode( $post->post_content, 'zipcode_form_kav') ) {
+      $post = get_page(get_the_ID());
+      wp_enqueue_script('states-js');
+      if( has_shortcode( $post->post_content, 'zipcode_form_kav') ) {
 
- wp_enqueue_script('my-ajax-handle');
- wp_enqueue_style('results-styling');
-wp_localize_script( 'my-ajax-handle', 'the_ajax_script',
-array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'kav-zipcode-nonce' )));
-      }
-  unset($post);
+     wp_enqueue_script('my-ajax-handle');
+     wp_enqueue_style('results-styling');
+    wp_localize_script( 'my-ajax-handle', 'the_ajax_script',
+    array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'kav-zipcode-nonce' )));
+          }
+      unset($post);
 }
 
  add_action( 'wp_enqueue_scripts', 'localize_ajax_functions' );
@@ -48,9 +54,11 @@ check_ajax_referer( 'kav-zipcode-nonce', 'nonce_data' );
  //$link = $domain . $_POST['link'];
  $link = $_POST['link'];
  $getTable = $_POST['getTable'];
+ $statename = $_POST['state'];
+     
  if(isset($link)){
        if($getTable == 'true'){
-        $table = query_VA_api_buildTable($link);
+        $table = query_VA_api_buildTable($link, $statename);
          echo $table;
          unset($table);
           }

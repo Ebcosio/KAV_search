@@ -58,22 +58,17 @@ or any full street address.
 <p style="text-align: center;">
 <input type="submit" id="va-search-submit" style="" value="Submit VA search" /></p>
 </form>
-
- <div id="vso-results">
-
- </div>
+ 
  <p id="status-message" role="alert" style="font-size: 16px; min-height: 1.5em; margin: 1px;"></p>
  <div id="zip-results" role="region" aria-label="VA search results will display here">
 
-
+ </div>
+ 
+ <div id="vso-results">
+ 
  </div>
 
-<script>
-// states array should be in external JS; if it reads, function is called below to build form options
-if(states !== undefined || states !== null){
- renderFormMenu(states);
-}
-</script>
+
  <noscript>You need Javascript enabled in your browser to utilize VA Facilities Search Form</noscript>
 <?php
 $theForm = ob_get_clean();
